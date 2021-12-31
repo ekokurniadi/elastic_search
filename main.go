@@ -6,10 +6,16 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 	"github.com/olivere/elastic"
 )
 
 func main() {
+	router := gin.Default()
+	router.Use(cors.Default())
+	api := router.Group("/api/v1")
+
 	client, err := elastic.NewClient(elastic.SetURL("http://localhost:9200"), elastic.SetSniff(false))
 
 	if err != nil {
@@ -30,4 +36,8 @@ func main() {
 		}
 		fmt.Println("Index belum ada")
 	}
+
+	api.GET("")
+	router.Run()
+
 }

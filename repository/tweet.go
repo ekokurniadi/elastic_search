@@ -17,3 +17,11 @@ type tweetRepository struct {
 func NewTweetRepository(db *gorm.DB) *tweetRepository {
 	return &tweetRepository{db}
 }
+
+func (r *tweetRepository) Save(tweet entity.Tweet) (entity.Tweet, error) {
+	err := r.db.Create(&tweet).Error
+	if err != nil {
+		return tweet, err
+	}
+	return tweet, nil
+}

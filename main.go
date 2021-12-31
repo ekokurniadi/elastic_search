@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
-	"elastic_go/entity"
+	"elastic_go/handler"
 	"elastic_go/mapping"
+	"elastic_go/repository"
+	"elastic_go/service"
 	"fmt"
 	"log"
 	"os"
@@ -37,14 +39,7 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	db.AutoMigrate(&entity.Tweet{})
-
-	router := gin.Default()
-	router.Use(cors.Default())
-	api := router.Group("/api/v1")
-
 	client, err := elastic.NewClient(elastic.SetURL("http://localhost:9200"), elastic.SetSniff(false))
-
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -64,7 +59,14 @@ func main() {
 		fmt.Println("Index belum ada")
 	}
 
-	api.GET("")
+	tweetRepository := repository.NewTweetRepository(db)
+	tweetService := service.NewTweetService(tweetRepository)
+	tweetHandler := handler.NewTweetHandler(tweetService)
+
+	router := gin.Default()
+	router.Use(cors.Default())
+	api := router.Group("/api/v1")
+	api.POST("/tweet", tweetHandler.Save)
 	router.Run()
 
 }

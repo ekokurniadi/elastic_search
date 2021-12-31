@@ -2,16 +2,43 @@ package main
 
 import (
 	"context"
+	"elastic_go/entity"
 	"elastic_go/mapping"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+
 	"github.com/olivere/elastic"
 )
 
 func main() {
+
+	env := godotenv.Load()
+	if env != nil {
+		log.Fatal("cannot load the .env file")
+	}
+
+	host := os.Getenv("HOST")
+	userHost := os.Getenv("USER_HOST")
+	userPass := os.Getenv("USER_PASS")
+	databaseName := os.Getenv("DATABASE_NAME")
+	databasePort := os.Getenv("DATABASE_PORT")
+
+	dsn := "host=" + host + " user=" + userHost + " password=" + userPass + " dbname=" + databaseName + " port=" + databasePort + " sslmode=disable TimeZone=Asia/Jakarta"
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	db.AutoMigrate(&entity.Tweet{})
+
 	router := gin.Default()
 	router.Use(cors.Default())
 	api := router.Group("/api/v1")

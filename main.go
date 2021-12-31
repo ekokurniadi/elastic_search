@@ -1,9 +1,7 @@
 package main
 
 import (
-	"context"
 	"elastic_go/handler"
-	"elastic_go/mapping"
 	"elastic_go/repository"
 	"elastic_go/service"
 	"fmt"
@@ -45,23 +43,9 @@ func main() {
 	}
 	fmt.Println("client is successfully connected")
 
-	ctx := context.Background()
-	isExist, err := client.IndexExists("belajar").Do(ctx)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	if !isExist {
-		_, err = client.CreateIndex("belajar").Body(mapping.Mapping).Do(ctx)
-		if err != nil {
-			log.Fatal(err.Error())
-		}
-		fmt.Println("Index belum ada")
-	}
-
 	tweetRepository := repository.NewTweetRepository(db)
 	tweetService := service.NewTweetService(tweetRepository)
-	tweetHandler := handler.NewTweetHandler(tweetService)
+	tweetHandler := handler.NewTweetHandler(tweetService, client)
 
 	router := gin.Default()
 	router.Use(cors.Default())

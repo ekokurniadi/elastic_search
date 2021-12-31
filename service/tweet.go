@@ -4,7 +4,7 @@ import (
 	"elastic_go/entity"
 	"elastic_go/input"
 	"elastic_go/repository"
-	"fmt"
+	"encoding/json"
 	"time"
 )
 
@@ -26,15 +26,19 @@ func (s *tweetService) Save(input input.TweetInput) (entity.Tweet, error) {
 	tweet.Message = input.Message
 	tweet.Retweets = input.Retweets
 	tweet.Created = time.Now()
-	tweet.Attrs = map[string]interface{}{
-		"views": input.Attrs.Views,
-		"vip":   input.Attrs.Vip,
+
+	x := make(map[string]interface{})
+	for key, val := range input.Attrs {
+		x[key] = val
 	}
 
-	fmt.Println(tweet.Attrs)
+	jsonByte, _ := json.Marshal(x)
+	tweet.Attrs = string(jsonByte)
+
 	newTweet, err := s.tweetRepository.Save(tweet)
 	if err != nil {
 		return newTweet, err
 	}
+
 	return newTweet, nil
 }
